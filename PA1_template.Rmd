@@ -1,5 +1,6 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Rachel Karpman"
 output: 
   html_document:
     keep_md: true
@@ -13,9 +14,9 @@ opts_chunk$set(fig.width=6, fig.height=4, fig.align = "center", digits = 2,
 ```
 ## Loading and preprocessing the data
 
-We load the activity data, and convert the `date` column to class `POSIXct` so that we can later use the `weekdays` function on dates.
+We load the activity data, and convert the `date` column to class `POSIXct` so that we can later use the `weekdays` function on the dates.
 
-It appears that each interval was originally encoded by giving its start time as the number of hours since the time recorded as 0, followed by the number of minutes, with no space or punctuation.  Fo example the number 135 would represent ''1 hour, 35 minutes since start time.''  For easier plotting, we edit the intervals column so that the intervals are simply numbered in order, starting at 0.  So for example, interval 5 is the 4th interval, which takes place from 15-20 minutes from start time.
+It appears that each interval was originally encoded by giving its start time as the number of hours since the time recorded as `0`, followed by the number of minutes, with no spaces or punctuation.  For example, the number `135` would represent ''1 hour, 35 minutes since time `0`.''  For easier plotting, we edit the intervals column so that the intervals are simply numbered in order, starting at `0`.  So for example, interval `5` takes place from 15-20 minutes after time `0`.
 
 ```{r}
 data <- read.csv("activity.csv", header = TRUE, na.strings = "NA", 
@@ -26,10 +27,9 @@ convert <- function(time){
 data$interval <- convert(data$interval)
 ```
 
-## What is mean total number of steps taken per day?
+## What is the mean total number of steps taken per day?
 
-First, we will attempt to answer this question ignoring all missing values.  We use `tapply` to obtain a vector `by_day` which gives total number of steps on each day, and then find the mean
-and median number of steps per day.
+First, we will attempt to answer this question ignoring all missing values.  We use `tapply` to obtain a vector `by_day` which gives total number of steps for each day.
 
 ```{r}
 by_day <- tapply(data$steps, data$date, sum, na.rm = TRUE)
@@ -64,14 +64,14 @@ We calculate the interval with the highest average number of steps
     max_interval <- df$interval[which.max(df$steps)]
 ```
 
-To make this answer more meaningful, we can convert it to hours and minutes:
+To make this answer more meaningful, we convert it to hours and minutes:
 ```{r}
     ## compute number of hours
     (max_interval * 5) %/% 60
     ## compute number of minutes
     (max_interval * 5) %% 60
 ```
-The highest average number of steps occurs in the 5-minute interval that starts `r (max_interval * 5) %/% 60` hours and `r (max_interval * 5) %% 60` minutes after 00:00.
+The highest average number of steps occurs in the 5-minute interval that starts `r (max_interval * 5) %/% 60` hours and `r (max_interval * 5) %% 60` minutes after time `0`.
 
 ## Imputing Missing Values
 
@@ -80,7 +80,7 @@ missing <- is.na(data$steps)
 ## compute the number of missing values
 sum(missing)
 ```
-There are `sum(missing)` missing values in our data set.  We replace each missing value by the average number of steps for the corresponding interval, which we can obtain from the dataframe `df` constructed above.
+There are `r sum(missing)` missing values in our data set.  We replace each missing value by the average number of steps for the corresponding interval, which we can obtain from the dataframe `df` constructed above.
 ```{r}
 for(idx in 1:dim(data)[1]){
     if(is.na(data$steps[idx])){
@@ -129,4 +129,4 @@ ggplot(data = my_data, aes(x = interval, y = meansteps)) + geom_line(color = "re
     labs(x = "Five-Minute Interval", y = "Average Number of Steps") + 
     ggtitle("Average Steps Per Five-Minute Interval")
 ```
-Assuming the start time for daily measurements occurs at midnights, it appears that the subject is less active early in the morning on weekends, than on weekdays; but more active in the afternoon and evening.  Assuming a typical work or school schedule, this is a fairly believable finding.
+Assuming the start time for daily measurements occurs at midnight, we see that on the weekends the subject is less active early in the morning, but more active in the afternoon and evening.  Assuming a typical work or school schedule, this is a very plausible finding.
